@@ -10,7 +10,7 @@
     <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script defer src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html {
             scroll-behavior: smooth
@@ -18,17 +18,6 @@
 
         body {
             font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial
-        }
-
-        .fade-img {
-            filter: blur(8px);
-            opacity: .0;
-            transition: filter .4s ease, opacity .4s ease
-        }
-
-        img[data-loaded="true"] {
-            filter: none;
-            opacity: 1
         }
 
         .thumb {
@@ -57,9 +46,7 @@
             <div class="grid md:grid-cols-[1fr,1.2fr] gap-8 md:gap-10 items-start">
                 <div>
                     <h1 class="text-3xl md:text-4xl font-semibold tracking-tight" data-t="intro.title">Artist Introduction</h1>
-                    <p class="mt-4 text-neutral-700 leading-7" id="artist-bio">
-                        <!-- Filled by JS from ARTIST.bio[lang] -->
-                    </p>
+                    <p class="mt-4 text-neutral-700 leading-7" id="artist-bio"></p>
                     <ul class="mt-6 text-sm text-neutral-600 space-y-1" aria-label="Artist quick facts">
                         <li><span class="font-medium text-neutral-800" data-t="intro.locationL">Location:</span> <span id="fact-location"></span></li>
                         <li><span class="font-medium text-neutral-800" data-t="intro.mediumsL">Mediums:</span> <span id="fact-mediums"></span></li>
@@ -82,11 +69,8 @@
                     <input id="search" type="search" placeholder="Search title, year, medium…" class="border rounded-xl px-3 py-2 w-64 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800" />
                 </div>
             </div>
-
             <div class="flex flex-wrap items-center gap-2 text-xs mb-6" id="filter-bar" aria-label="Filters"></div>
-
             <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6" aria-live="polite"></div>
-
             <div id="empty" class="hidden py-16 text-center text-neutral-600" data-t="gallery.empty">No artworks found.</div>
         </section>
 
@@ -115,8 +99,9 @@
         © <span id="year"></span> <span id="footer-name">Wang Zhichen · 王之琛</span>. All rights reserved.
     </footer>
 
+    <!-- ====================================  SCRIPT  ==================================== -->
     <script>
-        // === i18n strings ===
+        /* ---------- 1. i18n strings ---------- */
         const T = {
             en: {
                 nav: { about: 'Introduction', artworks: 'Artworks', contact: 'Contact' },
@@ -127,12 +112,12 @@
             zh: {
                 nav: { about: '简介', artworks: '作品', contact: '联系' },
                 intro: { title: '艺术家介绍', locationL: '所在地：', mediumsL: '创作媒介：', emailL: '邮箱：' },
-                gallery: { title: '作品', empty: '未找到相关作品', },
+                gallery: { title: '作品', empty: '未找到相关作品' },
                 contact: { title: '联系', desc: '如需了解作品、合作或藏购，请通过邮箱或社交媒体与我联系。', site: '网站：' }
             }
         };
 
-        // === Artist data (EN/中文) — extracted/condensed from the provided PDF ===
+        /* ---------- 2. Artist data ---------- */
         const ARTIST = {
             name: 'Wang Zhichen · 王之琛',
             bio: {
@@ -145,8 +130,7 @@
             social: { instagram: 'brokento.ash', website: 'https://yourdomain.com' }
         };
 
-        // === Works list (titles/year/medium) you can replace with real images; src now points to placeholders ===
-        // Use exported JPG/PNG files (e.g., images/whipink-01.jpg) to replace placeholder URLs.
+        /* ---------- 3. Artworks (make sure the files exist!) ---------- */
         const ARTWORKS = [
             { src: "images/Money.png", title: { en: 'Money keeps pouring in', zh: '财源滚滚' }, year: 2025, medium: { en: 'acrylic on linen', zh: '亚麻布·丙烯' }, size: '240×240cm', group: 'Golden Ink' },
             { src: "images/Towering.png", title: { en: 'Towering', zh: '巍峨' }, year: 2023, medium: { en: 'acrylic & Ink on Xuan Paper', zh: '宣纸·水墨·丙烯' }, size: '300×120cm', group: 'Whip Ink' },
@@ -156,95 +140,142 @@
             { src: "images/mountain3.png", title: { en: 'Tianming Mountain', zh: '天明山2025-25' }, year: 2025, medium: { en: 'Ink on Xuan Paper', zh: '宣纸·水墨' }, size: '133×133cm', group: 'Whip Ink' }
         ];
 
-        // === Runtime ===
+        /* ---------- 4. Helpers ---------- */
         const $ = (s, r = document) => r.querySelector(s);
         const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-        const yearSpan = $('#year'); yearSpan.textContent = new Date().getFullYear();
+
+        $('#year').textContent = new Date().getFullYear();
 
         let lang = 'en';
         const langToggle = $('#langToggle');
-        langToggle.addEventListener('click', () => { lang = lang === 'en' ? 'zh' : 'en'; renderLang(); searchAndFilter(); });
 
+        /* ---------- 5. Language handling ---------- */
         function setText(node, key) {
             const parts = key.split('.');
             let v = T[lang];
-            for (const p of parts) { v = v?.[p]; }
+            for (const p of parts) v = v?.[p];
             if (typeof v === 'string') node.textContent = v;
         }
 
         function renderLang() {
-            // nav & labels
             $$('[data-t]').forEach(el => setText(el, el.dataset.t));
-            // brand
             $('#brand').textContent = ARTIST.name;
-            // facts
+
             $('#artist-bio').textContent = ARTIST.bio[lang];
             $('#fact-location').textContent = ARTIST.location[lang];
             $('#fact-mediums').textContent = ARTIST.mediums[lang].join(', ');
-            const mail = ARTIST.email; $('#fact-email').href = `mailto:${mail}`; $('#fact-email').textContent = mail;
+
+            const mail = ARTIST.email;
+            $('#fact-email').href = `mailto:${mail}`; $('#fact-email').textContent = mail;
             $('#contact-email').href = `mailto:${mail}`; $('#contact-email').textContent = mail;
-            const ig = ARTIST.social.instagram; $('#contact-ig').href = `https://instagram.com/${ig}`; $('#contact-ig').textContent = `@${ig}`;
-            const web = ARTIST.social.website; $('#contact-web').href = web; $('#contact-web').textContent = web.replace(/^https?:\/\//, '');
-            // placeholders localized
-            $('#search').placeholder = lang === 'en' ? 'Search title, year, medium…' : '搜索：标题 / 年份 / 媒介…';
+
+            const ig = ARTIST.social.instagram;
+            $('#contact-ig').href = `https://instagram.com/${ig}`;
+            $('#contact-ig').textContent = `@${ig}`;
+
+            const web = ARTIST.social.website;
+            $('#contact-web').href = web;
+            $('#contact-web').textContent = web.replace(/^https?:\/\//, '');
+
+            $('#search').placeholder = lang === 'en'
+                ? 'Search title, year, medium…'
+                : '搜索：标题 / 年份 / 媒介…';
+
+            langToggle.textContent = lang === 'en' ? '中文' : 'EN';
         }
 
-        // Build filters from group, mediums and years
-        const filters = new Set();
-        ARTWORKS.forEach(a => { if (a.group) filters.add(a.group); if (a.year) filters.add(String(a.year)); });
+        langToggle.addEventListener('click', () => {
+            lang = lang === 'en' ? 'zh' : 'en';
+            renderLang();
+            searchAndFilter();               // re-render gallery with new language
+        });
+
+        /* ---------- 6. Filters ---------- */
         const filterBar = $('#filter-bar');
+        const filters = new Set();
+        ARTWORKS.forEach(a => {
+            if (a.group) filters.add(a.group);
+            if (a.year) filters.add(String(a.year));
+        });
         filters.forEach(f => {
             const btn = document.createElement('button');
             btn.className = 'px-3 py-1.5 rounded-full border text-neutral-700 hover:bg-neutral-50';
-            btn.textContent = f; btn.dataset.filter = f.toLowerCase();
+            btn.textContent = f;
+            btn.dataset.filter = f.toLowerCase();
+            btn.setAttribute('aria-pressed', 'false');
             filterBar.appendChild(btn);
         });
 
+        /* ---------- 7. Gallery rendering ---------- */
         const gallery = $('#gallery');
         const empty = $('#empty');
 
         function caption(a) {
-            const bits = [(a.title?.[lang] || a.title), a.year, (a.medium?.[lang] || a.medium), a.size].filter(Boolean);
+            const bits = [
+                a.title?.[lang] || a.title,
+                a.year,
+                a.medium?.[lang] || a.medium,
+                a.size
+            ].filter(Boolean);
             return bits.join(' · ');
-        }
-
-        function loadImage(img) {
-            const i = new Image(); i.src = img.dataset.src; i.onload = () => { img.src = i.src; img.dataset.loaded = 'true'; };
         }
 
         function render(list) {
             gallery.innerHTML = '';
-            if (!list.length) { empty.classList.remove('hidden'); empty.textContent = T[lang].gallery.empty; return; } else { empty.classList.add('hidden'); }
+            if (!list.length) {
+                empty.classList.remove('hidden');
+                empty.textContent = T[lang].gallery.empty;
+                return;
+            }
+            empty.classList.add('hidden');
+
             list.forEach((a, idx) => {
                 const card = document.createElement('article');
                 card.className = 'group border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-sm focus-within:shadow-sm transition-shadow';
                 card.innerHTML = `
-              <button class="block w-full text-left" data-idx="${idx}" aria-label="Open ${(a.title?.[lang] || a.title)}">
-                <div class="bg-neutral-100">
-                  <img class="thumb fade-img w-full" alt="${(a.title?.[lang] || a.title)}" data-src="${a.src}" />
-                </div>
-                <div class="p-3">
-                  <h3 class="text-sm font-medium">${(a.title?.[lang] || a.title) || 'Untitled'}</h3>
-                  <p class="mt-1 text-xs text-neutral-600">${caption(a)}</p>
-                </div>
-              </button>`;
+                        <button class="block w-full text-left" data-idx="${idx}" aria-label="Open ${a.title?.[lang] || a.title}">
+                            <div class="bg-neutral-100">
+                                <img class="thumb fade-img w-full"
+                                     src="${a.src}"
+                                     alt="${a.title?.[lang] || a.title}"
+                                     onload="this.dataset.loaded='true'"
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNjY2MiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlBsYWNlaG9sZGVyPC90ZXh0Pjwvc3ZnPg==';this.dataset.loaded='true'" />
+                            </div>
+                            <div class="p-3">
+                                <h3 class="text-sm font-medium">${a.title?.[lang] || a.title || 'Untitled'}</h3>
+                                <p class="mt-1 text-xs text-neutral-600">${caption(a)}</p>
+                            </div>
+                        </button>`;
                 gallery.appendChild(card);
             });
-            $$('#gallery img').forEach(loadImage);
         }
 
+        /* ---------- 8. Search & filter ---------- */
         function searchAndFilter() {
             const q = $('#search').value.trim().toLowerCase();
             const active = $$('#filter-bar button[aria-pressed="true"]').map(b => b.dataset.filter);
+
             let list = ARTWORKS.slice();
-            if (q) { list = list.filter(a => [a.title?.en, a.title?.zh, a.medium?.en, a.medium?.zh, a.year, a.size, a.group].join(' ').toLowerCase().includes(q)); }
-            if (active.length) { list = list.filter(a => active.every(f => `${a.group}`.toLowerCase().includes(f) || `${a.year}` === f)); }
+
+            if (q) {
+                list = list.filter(a => [
+                    a.title?.en, a.title?.zh,
+                    a.medium?.en, a.medium?.zh,
+                    a.year, a.size, a.group
+                ].join(' ').toLowerCase().includes(q));
+            }
+            if (active.length) {
+                list = list.filter(a => active.every(f =>
+                    `${a.group}`.toLowerCase().includes(f) || `${a.year}` === f
+                ));
+            }
             render(list);
         }
 
         $('#search').addEventListener('input', searchAndFilter);
         $('#filter-bar').addEventListener('click', e => {
-            const b = e.target.closest('button'); if (!b) return;
+            const b = e.target.closest('button');
+            if (!b) return;
             const on = b.getAttribute('aria-pressed') === 'true';
             b.setAttribute('aria-pressed', on ? 'false' : 'true');
             b.classList.toggle('bg-neutral-900', !on);
@@ -252,11 +283,13 @@
             searchAndFilter();
         });
 
+        /* ---------- 9. Lightbox ---------- */
         gallery.addEventListener('click', e => {
-            const btn = e.target.closest('button[data-idx]'); if (!btn) return;
-            const a = (ARTWORKS.slice().filter(Boolean))[btn.dataset.idx];
-            if (!a) return;
-            $('#lightboxImg').src = a.src; $('#lightboxImg').alt = (a.title?.[lang] || a.title) || '';
+            const btn = e.target.closest('button[data-idx]');
+            if (!btn) return;
+            const a = ARTWORKS[btn.dataset.idx];
+            $('#lightboxImg').src = a.src;
+            $('#lightboxImg').alt = a.title?.[lang] || a.title || '';
             $('#lightboxCaption').textContent = caption(a);
             $('#lightbox').classList.remove('hidden');
             $('#closeModal').focus();
@@ -264,9 +297,10 @@
         $('#closeModal').addEventListener('click', () => $('#lightbox').classList.add('hidden'));
         document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#lightbox').classList.add('hidden'); });
 
-        // First render
-        renderLang();
-        render(ARTWORKS);
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLang();
+            render(ARTWORKS);
+        });
     </script>
 </body>
 </html>
