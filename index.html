@@ -1,187 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-
-    <!-- 
-      TODO
-
-      Upload your Unemployable (or whatever photo you like) to the assets/images folder
-      and change the name of the image below to match the uploaded one
-
-      Change the title in the <title> tag to whatever you would like the title of your portfolio to be
-
-      This should be the same across all pages.
-     -->
-    <link rel="icon" href="./assets/images/1311.png" />
-		<title>Unemployables Portfolio</title>
-    <meta name="description" content="A portfolio template for the Unemployables community.">
+<head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wang Zhichen · 王之琛 — Portfolio</title>
+    <meta name="description" content="Clean, bilingual (EN/中文) online portfolio with artworks and contact information." />
+    <meta property="og:title" content="Wang Zhichen · 王之琛 — Portfolio" />
+    <meta property="og:description" content="Clean, bilingual (EN/中文) online portfolio with artworks and contact information." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth
+        }
 
-		<link rel="stylesheet" href="./css/layout.css">
-    <link rel="stylesheet" href="./css/typography.css">
-    <link rel="stylesheet" href="./css/utilities.css">
+        body {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial
+        }
 
-		<script defer src="./js/script.js"></script>
-	</head>
-	<body>
-    <!-- NAVBAR -->
-    <div class="navbar">
-      <a class="nav-title-link" href="./index.html">
-        <!-- TODO - Change the "Portfolio Title" to whatever you want displayed in the top left -->
-        <span class="nav-title">Portfolio Title</span>
-         <!-- TODO - Change the email after 'mailto:' to your email address for contact -->
-        <a class="button" href="mailto:whitevans.eth@gmail.com">
-          <span class="button-text">Contact Me</span>
-        </a>
-      </a>
+        .fade-img {
+            filter: blur(8px);
+            opacity: .0;
+            transition: filter .4s ease, opacity .4s ease
+        }
+
+        img[data-loaded="true"] {
+            filter: none;
+            opacity: 1
+        }
+
+        .thumb {
+            aspect-ratio: 4/3;
+            object-fit: cover
+        }
+    </style>
+</head>
+<body class="bg-white text-neutral-900">
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-neutral-200">
+        <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
+            <a href="#top" id="brand" class="text-lg md:text-xl font-semibold tracking-tight">Wang Zhichen · 王之琛</a>
+            <nav class="text-sm font-medium flex items-center gap-4 md:gap-6">
+                <a class="hover:opacity-70" href="#about" data-t="nav.about">Introduction</a>
+                <a class="hover:opacity-70" href="#artworks" data-t="nav.artworks">Artworks</a>
+                <a class="hover:opacity-70" href="#contact" data-t="nav.contact">Contact</a>
+                <button id="langToggle" class="ml-2 rounded-full border px-3 py-1.5 hover:bg-neutral-50" aria-label="Toggle language">中文/ENG</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="top" class="mx-auto max-w-6xl px-4">
+        <!-- Introduction -->
+        <section id="about" class="py-12 md:py-16">
+            <div class="grid md:grid-cols-[1fr,1.2fr] gap-8 md:gap-10 items-start">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-semibold tracking-tight" data-t="intro.title">Artist Introduction</h1>
+                    <p class="mt-4 text-neutral-700 leading-7" id="artist-bio">
+                        <!-- Filled by JS from ARTIST.bio[lang] -->
+                    </p>
+                    <ul class="mt-6 text-sm text-neutral-600 space-y-1" aria-label="Artist quick facts">
+                        <li><span class="font-medium text-neutral-800" data-t="intro.locationL">Location:</span> <span id="fact-location"></span></li>
+                        <li><span class="font-medium text-neutral-800" data-t="intro.mediumsL">Mediums:</span> <span id="fact-mediums"></span></li>
+                        <li><span class="font-medium text-neutral-800" data-t="intro.emailL">Email:</span> <a id="fact-email" class="underline" href="#"></a></li>
+                    </ul>
+                </div>
+                <figure class="rounded-2xl overflow-hidden shadow-sm border border-neutral-200">
+                    <img src="images/wangchen.png" alt="Studio / hero artwork" class="w-full h-full object-cover" />
+                    <figcaption class="sr-only">Hero image</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Gallery -->
+        <section id="artworks" class="py-10 md:py-14 border-t border-neutral-200">
+            <div class="flex items-end justify-between mb-6">
+                <h2 class="text-2xl md:text-3xl font-semibold tracking-tight" data-t="gallery.title">Artworks</h2>
+                <div class="relative">
+                    <label for="search" class="sr-only">Search artworks</label>
+                    <input id="search" type="search" placeholder="Search title, year, medium…" class="border rounded-xl px-3 py-2 w-64 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800" />
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-xs mb-6" id="filter-bar" aria-label="Filters"></div>
+
+            <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6" aria-live="polite"></div>
+
+            <div id="empty" class="hidden py-16 text-center text-neutral-600" data-t="gallery.empty">No artworks found.</div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="py-12 md:py-16 border-t border-neutral-200">
+            <h2 class="text-2xl md:text-3xl font-semibold tracking-tight" data-t="contact.title">Contact</h2>
+            <p class="mt-4 text-neutral-700" data-t="contact.desc">For inquiries, collaborations, or acquisitions, please reach out via email or social links below.</p>
+            <ul class="mt-6 space-y-2 text-neutral-800">
+                <li><span data-t="intro.emailL">Email:</span> <a class="underline" id="contact-email" href="#"></a></li>
+                <li>Instagram: <a class="underline" id="contact-ig" target="_blank" rel="noopener"></a></li>
+                <li data-t="contact.site">Website: <a class="underline" id="contact-web" target="_blank" rel="noopener"></a></li>
+            </ul>
+        </section>
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-label="Artwork viewer">
+        <button id="closeModal" class="absolute top-4 right-4 text-white text-2xl" aria-label="Close">×</button>
+        <figure class="max-w-5xl w-full">
+            <img id="lightboxImg" src="" alt="" class="w-full h-auto rounded-xl shadow-lg" />
+            <figcaption id="lightboxCaption" class="mt-3 text-neutral-100 text-sm"></figcaption>
+        </figure>
     </div>
 
-    <!-- MAIN PAGE CONTENT -->
-    <div id="main-content">
+    <footer class="py-10 border-t border-neutral-200 text-center text-sm text-neutral-600">
+        © <span id="year"></span> <span id="footer-name">Wang Zhichen · 王之琛</span>. All rights reserved.
+    </footer>
 
-      <!-- PORTFOLIO HEADER -->
-      <div id="portfolio-header">
-        <div id="portfolio-header-image-container">
-          <!-- 
-            TODO
+    <script>
+        // === i18n strings ===
+        const T = {
+            en: {
+                nav: { about: 'Introduction', artworks: 'Artworks', contact: 'Contact' },
+                intro: { title: 'Artist Introduction', locationL: 'Location:', mediumsL: 'Mediums:', emailL: 'Email:' },
+                gallery: { title: 'Artworks', empty: 'No artworks found.' },
+                contact: { title: 'Contact', desc: 'For inquiries, collaborations, or acquisitions, please reach out via email or social links below.', site: 'Website:' }
+            },
+            zh: {
+                nav: { about: '简介', artworks: '作品', contact: '联系' },
+                intro: { title: '艺术家介绍', locationL: '所在地：', mediumsL: '创作媒介：', emailL: '邮箱：' },
+                gallery: { title: '作品', empty: '未找到相关作品', },
+                contact: { title: '联系', desc: '如需了解作品、合作或藏购，请通过邮箱或社交媒体与我联系。', site: '网站：' }
+            }
+        };
 
-            - Change the img "src" attribute to point to the Unemployable image you uploaded (or whatever image).
-            - Change the number to point to your Unemployable & replace the OpenSea link with your own
-            - If you aren't using an Unemployable as your image, remove the entire "a" element
-          -->
-          <img src="./assets/images/1311.png" class="portfolio-header-image">
-          <a class="no-underline" target="_blank" href="https://opensea.io/assets/0xe0be388ab81c47b0f098d2030a1c9ef190691a8a/1311">
-            <span class="image-caption">Unemployables #1311</span>
-          </a>
-        </div>
+        // === Artist data (EN/中文) — extracted/condensed from the provided PDF ===
+        const ARTIST = {
+            name: 'Wang Zhichen · 王之琛',
+            bio: {
+                en: `Born 1965, Ninghai, Zhejiang. Graduate of Ningbo Normal College (1988). Trained at Jiang Baolin Chinese Painting Studio and at China National Academy of Painting (mixed-media program). Founder of Ninghai Hot Spring Culture & Art Village; Director of 99 Art Museum (Ningbo); Vice Chair, Ningbo Artists Association; Council Member, Zhejiang Artists Association; Member, China Artists Association. Wang explores ink and mixed media through three signatures: finger-ink, golden-ink, and whip-ink, merging Eastern literati aesthetics with contemporary abstraction.`,
+                zh: `1965 年生于浙江宁海，1988 年毕业于宁波师范学院；曾就读于姜宝林中国画工作室高研班、国家画院胡伟综合材料绘画高研班。宁海温泉文化艺术村创始人；宁波玖玖美术馆馆长；宁波市美术家协会副主席；浙江省美术家协会理事；中国美术家协会会员等。长期以“指墨、金墨、鞭墨”为主要线索，在东方审美与当代抽象之间展开探索。`
+            },
+            email: 'publicmikewang@gmail.com',
+            location: { en: 'Ningbo, China', zh: '中国 宁波' },
+            mediums: { en: ['Ink', 'Acrylic', 'Mineral pigments', 'Mixed media'], zh: ['水墨', '丙烯', '矿物色', '综合材料'] },
+            social: { instagram: 'brokento.ash', website: 'https://yourdomain.com' }
+        };
 
-          <!-- 
-            TODO
+        // === Works list (titles/year/medium) you can replace with real images; src now points to placeholders ===
+        // Use exported JPG/PNG files (e.g., images/whipink-01.jpg) to replace placeholder URLs.
+        const ARTWORKS = [
+            { src: "images/Money.png", title: { en: 'Money keeps pouring in', zh: '财源滚滚' }, year: 2025, medium: { en: 'acrylic on linen', zh: '亚麻布·丙烯' }, size: '240×240cm', group: 'Golden Ink' },
+            { src: "images/Towering.png", title: { en: 'Towering', zh: '巍峨' }, year: 2023, medium: { en: 'acrylic & Ink on Xuan Paper', zh: '宣纸·水墨·丙烯' }, size: '300×120cm', group: 'Whip Ink' },
+            { src: "images/Color.png", title: { en: 'Colorful', zh: '缤纷' }, year: 2024, medium: { en: 'acrylic on linen', zh: '亚麻布·丙烯' }, size: '260×110cm', group: 'Whip Ink' },
+            { src: "images/mountain1.png", title: { en: 'Tianming Mountain', zh: '天明山2025-28' }, year: 2025, medium: { en: 'acrylic & Ink on Xuan Paper', zh: '宣纸·水墨·丙烯' }, size: '258×198cm', group: 'Whip Ink' },
+            { src: "images/mountain2.png", title: { en: 'Tianming Mountain', zh: '天明山2025-26' }, year: 2025, medium: { en: 'Ink on Xuan Paper', zh: '宣纸·水墨' }, size: '133×133cm', group: 'Whip Ink' },
+            { src: "images/mountain3.png", title: { en: 'Tianming Mountain', zh: '天明山2025-25' }, year: 2025, medium: { en: 'Ink on Xuan Paper', zh: '宣纸·水墨' }, size: '133×133cm', group: 'Whip Ink' }
+        ];
 
-            - Change the main-title to whatver you want
-            - Change the body-text after that to a quick introduction to what you do
-            - Edit the button text if you feel like it. It will link to the projects section below.
-          -->
-        <div id="portfolio-header-text-container">
-            <div class="header-text">
-              <span class="main-title">Hey, I'm @ndoherty_eth.</span>
-              <div class="body-text">I’m a freelance designer and developer who aims to help other creatives build out their portfolios, skillset, and businesses.</div>
-            </div>
-            <a class="button" id="my-work-link">
-              <span class="button-text">Check out my projects</span> 
-              <image src="./assets/icons/arrow-right.svg" class="right-arrow-icon"/>
-            </a>
-        </div>
-      </div>
+        // === Runtime ===
+        const $ = (s, r = document) => r.querySelector(s);
+        const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+        const yearSpan = $('#year'); yearSpan.textContent = new Date().getFullYear();
 
-      <!-- ABOUT SECTION -->
-      <!-- 
-        TODO
+        let lang = 'en';
+        const langToggle = $('#langToggle');
+        langToggle.addEventListener('click', () => { lang = lang === 'en' ? 'zh' : 'en'; renderLang(); searchAndFilter(); });
 
-        - Change the subheader-text to whatever header you want
-        - Add paragraphs using the <div class="body-text"></div> elements in the "about-section-content"
-      -->
-      <div id="about-section">
-        <span class="subheader-text">My Background / About Me</span>
-        <div class="about-section-content">
-          <div class="body-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Tristique risus nec feugiat in fermentum. Sed id semper risus in hendrerit gravida. Placerat duis ultricies lacus sed. Id neque aliquam vestibulum morbi blandit cursus risus. Elit pellentesque habitant morbi tristique senectus et netus et. Elementum tempus egestas sed sed risus pretium quam. Nibh ipsum consequat nisl vel pretium lectus quam id leo. Vitae congue mauris rhoncus aenean vel elit.</div>
-          <div class="body-text">Vitae justo eget magna fermentum. Imperdiet nulla malesuada pellentesque elit eget gravida. Aliquet nec ullamcorper sit amet. Aliquet sagittis id consectetur purus. Ac tortor dignissim convallis aenean. Enim neque volutpat ac tincidunt vitae. Lobortis feugiat vivamus at augue. Platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Viverra orci sagittis eu volutpat. Massa tincidunt nunc pulvinar sapien et ligula. Donec enim diam vulputate ut.</div>
-        </div>
-      </div>
+        function setText(node, key) {
+            const parts = key.split('.');
+            let v = T[lang];
+            for (const p of parts) { v = v?.[p]; }
+            if (typeof v === 'string') node.textContent = v;
+        }
 
-      <!-- PROJECTS / MY WORK SECTION -->
-      <div id="my-work-section">
-        <!-- TODO - Change the subheader-text to whatever you want the Projects section header to say -->
-        <span class="subheader-text">My Work / My Projects</span>
+        function renderLang() {
+            // nav & labels
+            $$('[data-t]').forEach(el => setText(el, el.dataset.t));
+            // brand
+            $('#brand').textContent = ARTIST.name;
+            // facts
+            $('#artist-bio').textContent = ARTIST.bio[lang];
+            $('#fact-location').textContent = ARTIST.location[lang];
+            $('#fact-mediums').textContent = ARTIST.mediums[lang].join(', ');
+            const mail = ARTIST.email; $('#fact-email').href = `mailto:${mail}`; $('#fact-email').textContent = mail;
+            $('#contact-email').href = `mailto:${mail}`; $('#contact-email').textContent = mail;
+            const ig = ARTIST.social.instagram; $('#contact-ig').href = `https://instagram.com/${ig}`; $('#contact-ig').textContent = `@${ig}`;
+            const web = ARTIST.social.website; $('#contact-web').href = web; $('#contact-web').textContent = web.replace(/^https?:\/\//, '');
+            // placeholders localized
+            $('#search').placeholder = lang === 'en' ? 'Search title, year, medium…' : '搜索：标题 / 年份 / 媒介…';
+        }
 
-        <div class="projects-container">
-          <!-- 
-            TODO
+        // Build filters from group, mediums and years
+        const filters = new Set();
+        ARTWORKS.forEach(a => { if (a.group) filters.add(a.group); if (a.year) filters.add(String(a.year)); });
+        const filterBar = $('#filter-bar');
+        filters.forEach(f => {
+            const btn = document.createElement('button');
+            btn.className = 'px-3 py-1.5 rounded-full border text-neutral-700 hover:bg-neutral-50';
+            btn.textContent = f; btn.dataset.filter = f.toLowerCase();
+            filterBar.appendChild(btn);
+        });
 
-            This is where the project cards live. Here's a base level project card for you to copy:
-            <div class="project-card">
-              <img src="./assets/images/IMAGE_NAME" class="project-image">
-              <div class="project-card-text-container">
-                <div class="subheader-text project-title">PROJECT_NAME</div>
-                <div class="body-text project-card-text">SMALL_PROJECT_DESCRIPTION</div>
-              </div>
-              <a class="button" href="./project-pages/PROJECT_PAGE_NAME.html">
-                <span class="button-text">Read More</span>
-                <image src="./assets/icons/arrow-right.svg" class="right-arrow-icon"/>
-              </a>
-            </div>
+        const gallery = $('#gallery');
+        const empty = $('#empty');
 
-            - To add a project to the this area, copy the above, paste it below this comment, and change the following:
-                - IMAGE_NAME: the name of the image file in assets/images
-                - PROJECT_NAME: the name of the project (keep it short, it only shows 1 line)
-                - SMALL_PROJECT_DESCRIPTION: a quick project description (max 4 lines)
-                - PROJECT_PAGE_NAME.html: the html filename for the project (must be in project-pages folder)
-          -->
-          <div class="project-card">
-            <img src="./assets/images/desktop.jpeg" class="project-image">
-            <div class="project-card-text-container">
-              <div class="subheader-text project-title">Project Name</div>
-              <div class="body-text project-card-text">Elit pellentesque habitant morbi tristique senectus et netus et. Elementum tempus egestas sed sed risus pretium quam. Nibh ipsum consequat nisl vel pretium</div>
-            </div>
-            <a class="button" href="./project-pages/project-template.html">
-              <span class="button-text">Read More</span>
-              <image src="./assets/icons/arrow-right.svg" class="right-arrow-icon"/>
-            </a>
-          </div>
-          <div class="project-card">
-            <img src="./assets/images/code.jpeg" class="project-image">
-            <div class="project-card-text-container">
-              <div class="subheader-text project-title">Project Name</div>
-              <div class="body-text project-card-text">Elit pellentesque habitant morbi tristique senectus et netus et. Elementum tempus egestas sed sed risus pretium quam. Nibh ipsum consequat nisl vel pretium</div>
-            </div>
-            <a class="button" href="./project-pages/project-template.html">
-              <span class="button-text">Read More</span>
-              <image src="./assets/icons/arrow-right.svg" class="right-arrow-icon"/>
-            </a>
-          </div>
-          <div class="project-card">
-            <img src="./assets/images/sketchbook.jpeg" class="project-image">
-            <div class="project-card-text-container">
-              <div class="subheader-text project-title">Super Long Project Name That Should be Hidden</div>
-              <div class="body-text project-card-text">Elit pellentesque habitant morbi tristique senectus et netus et. Elementum tempus egestas sed sed risus pretium quam. Nibh ipsum consequat nisl vel pretium</div>
-            </div>
-            <a class="button" href="./project-pages/project-template.html">
-              <span class="button-text">Read More</span>
-              <image src="./assets/icons/arrow-right.svg" class="right-arrow-icon"/>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+        function caption(a) {
+            const bits = [(a.title?.[lang] || a.title), a.year, (a.medium?.[lang] || a.medium), a.size].filter(Boolean);
+            return bits.join(' · ');
+        }
 
-    <!-- FOOTER -->
-    <div id="footer">
-      <!-- 
-        TODO - Change href to your Instagram account (can also delete entire "a" element if no Instagram) 
+        function loadImage(img) {
+            const i = new Image(); i.src = img.dataset.src; i.onload = () => { img.src = i.src; img.dataset.loaded = 'true'; };
+        }
 
-        This should be the same across all pages.
-      -->
-      <a class="icon-link" target="_blank" href="https://twitter.com/whitevans_eth">
-        <image src="./assets/icons/instagram.svg" class="footer-icon"/>
-      </a>
-      <!-- 
-        TODO - Change href to your Twitter account (can also delete entire "a" element if no Twitter) 
-      
-        This should be the same across all pages.
-      -->
-      <a class="icon-link" target="_blank" href="https://twitter.com/whitevans_eth">
-        <image src="./assets/icons/twitter.svg" class="footer-icon"/>
-      </a>
-      <!-- 
-        TODO - Change the email after "mailto" to your contact email 
-      
-        This should be the same across all pages.
-      -->
-      <a class="icon-link" href="mailto:whitevans.eth@gmail.com">
-        <image src="./assets/icons/mail.svg" class="footer-icon"/>
-      </a>
-    </div>
+        function render(list) {
+            gallery.innerHTML = '';
+            if (!list.length) { empty.classList.remove('hidden'); empty.textContent = T[lang].gallery.empty; return; } else { empty.classList.add('hidden'); }
+            list.forEach((a, idx) => {
+                const card = document.createElement('article');
+                card.className = 'group border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-sm focus-within:shadow-sm transition-shadow';
+                card.innerHTML = `
+              <button class="block w-full text-left" data-idx="${idx}" aria-label="Open ${(a.title?.[lang] || a.title)}">
+                <div class="bg-neutral-100">
+                  <img class="thumb fade-img w-full" alt="${(a.title?.[lang] || a.title)}" data-src="${a.src}" />
+                </div>
+                <div class="p-3">
+                  <h3 class="text-sm font-medium">${(a.title?.[lang] || a.title) || 'Untitled'}</h3>
+                  <p class="mt-1 text-xs text-neutral-600">${caption(a)}</p>
+                </div>
+              </button>`;
+                gallery.appendChild(card);
+            });
+            $$('#gallery img').forEach(loadImage);
+        }
 
-	</body>
+        function searchAndFilter() {
+            const q = $('#search').value.trim().toLowerCase();
+            const active = $$('#filter-bar button[aria-pressed="true"]').map(b => b.dataset.filter);
+            let list = ARTWORKS.slice();
+            if (q) { list = list.filter(a => [a.title?.en, a.title?.zh, a.medium?.en, a.medium?.zh, a.year, a.size, a.group].join(' ').toLowerCase().includes(q)); }
+            if (active.length) { list = list.filter(a => active.every(f => `${a.group}`.toLowerCase().includes(f) || `${a.year}` === f)); }
+            render(list);
+        }
+
+        $('#search').addEventListener('input', searchAndFilter);
+        $('#filter-bar').addEventListener('click', e => {
+            const b = e.target.closest('button'); if (!b) return;
+            const on = b.getAttribute('aria-pressed') === 'true';
+            b.setAttribute('aria-pressed', on ? 'false' : 'true');
+            b.classList.toggle('bg-neutral-900', !on);
+            b.classList.toggle('text-white', !on);
+            searchAndFilter();
+        });
+
+        gallery.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-idx]'); if (!btn) return;
+            const a = (ARTWORKS.slice().filter(Boolean))[btn.dataset.idx];
+            if (!a) return;
+            $('#lightboxImg').src = a.src; $('#lightboxImg').alt = (a.title?.[lang] || a.title) || '';
+            $('#lightboxCaption').textContent = caption(a);
+            $('#lightbox').classList.remove('hidden');
+            $('#closeModal').focus();
+        });
+        $('#closeModal').addEventListener('click', () => $('#lightbox').classList.add('hidden'));
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#lightbox').classList.add('hidden'); });
+
+        // First render
+        renderLang();
+        render(ARTWORKS);
+    </script>
+</body>
 </html>
